@@ -1,11 +1,12 @@
 # -
-Всем привет, я вообще не разбираюсь в кодах и на просторах интерпретаторы набрел на граббер, взял скрипт, подкорректировал под себя, запустил, вылезает ошибка “TypeError: ‘function’ object is not iterable”
+Всем привет, я вообще не разбираюсь в кодах и на просторах интернета набрел на граббер, взял скрипт, подкорректировал под себя, запустил, вылезает ошибка “TypeError: ‘function’ object is not iterable”
 Подскажите пожалуйста что необходимо написать, чтобы ее исправить
 
-from pyrogram import Client, filters # телеграм клиент
-import shelve  # файловая база данных
+from pyrogram import Client, filters
+import shelve 
 db = shelve.open('data.db', writeback=True)
-# Создать можно на my.telegram.org
+ 
+
 API_ID = 189427401492
 API_HASH = '87d63b57bf50a00681a11f194920592952'
 PRIVATE_PUBLIC = '@'  # скрытый паблик для управления ботом
@@ -18,25 +19,19 @@ SOURCE_PUBLICS = [
     '@ostorozhno_novosti'
 ]
 PHONE_NUMBER = '+79811177235'  # номер зарегистрованный в телеге
-# создаем клиент телеграм
+
 app = Client("cyberpunk", api_id=API_ID, api_hash=API_HASH,
              phone_number=PHONE_NUMBER)
-# обработчик нового сообщения
-# вызывается при появлении нового поста в одном из пабликов-доноров
 @app.on_message(filters.chat(SOURCE_PUBLICS))
 def new_channel_post(client, message):
-    # сохраняем пост в базу (функцию add_post_to_db определим потом)
     post_id = add_post_to_db(message)
-    # пересылаем пост в скрытый паблик
+    
     message.forward(PRIVATE_PUBLIC)
-    # в скрытый паблик отправляем присвоенный id поста
     client.send_message(PRIVATE_PUBLIC, post_id)
-    # потом для пересылки в публичный паблик админ должен отправить боту этот id
-# функция сохранения поста в бд
-# генерирует уникальный id для поста и возвратит этот id
+    # потом для пересылки в публичный паблик админ должен отправить боту этот
 def add_post_to_db(message):
     try:
-        # генерируем уникальный id для поста, равен максимальному в базе + 1
+     
         new_id = max(int(k) for k in db.keys()
                      if k.isdigit()) + 1
     except:
@@ -50,8 +45,7 @@ def add_post_to_db(message):
         'message_id': message,  # внутренний id сообщения
     }
     return new_id
- # обработчик нового сообщения из скрытого паблика
- # если админ пишет в паблик 132+ это значит переслать пост с id = 132 в публичный паблик
+
 @app.on_message(filters.chat(PRIVATE_PUBLIC)
                 & filters.regex(r'\d+\+')  # фильтр текста сообщения {число}+
                 )
